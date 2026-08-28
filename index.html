@@ -93,7 +93,6 @@
       border-color: var(--primary);
     }
 
-    /* Lista de Escolha Multipla */
     .sabor-row {
       display: flex;
       align-items: center;
@@ -275,6 +274,17 @@
       color: var(--primary);
       margin-right: 8px;
     }
+
+    .dia-header {
+      background-color: #1d0330;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin: 10px 0 6px 0;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--primary);
+      border-left: 4px solid var(--primary);
+    }
   </style>
 </head>
 <body>
@@ -339,6 +349,11 @@
     </div>
 
     <div id="tab-relatorio" class="tab-content">
+      <div class="card">
+        <h2>Vendas Diárias (Histórico)</h2>
+        <div id="relatorio-diario"></div>
+      </div>
+
       <div class="card">
         <h2>Sabores Mais Vendidos</h2>
         <div id="ranking-sabores"></div>
@@ -447,6 +462,11 @@
         return;
       }
 
+      const agora = new Date();
+      const dataIso = agora.toISOString().split('T')[0]; // Ex: "2026-08-28"
+      const dataFormatada = agora.toLocaleDateString('pt-BR'); // Ex: "28/08/2026"
+      const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
       let resumoSabores = [];
 
       catalogoSabores.forEach((item, index) => {
@@ -462,7 +482,9 @@
             precoUnit: item.preco,
             total: subtotal,
             pagamento,
-            data: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            dataIso,
+            dataFormatada,
+            hora: horaFormatada
           });
         }
       });
@@ -471,7 +493,6 @@
 
       alert(`Venda registrada com sucesso!\n\nItens:\n${resumoSabores.join('\n')}\n\nTotal: R$ ${totalVenda.toFixed(2).replace('.', ',')}`);
 
-      // Reseta as quantidades após a venda
       quantidades = {};
       renderizarListaSabores();
     }
@@ -485,11 +506,14 @@
         return;
       }
 
+      const agora = new Date();
       const saida = {
         id: Date.now(),
         desc,
         valor,
-        data: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        dataIso: agora.toISOString().split('T')[0],
+        dataFormatada: agora.toLocaleDateString('pt-BR'),
+        hora: agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
       };
 
       saidas.push(saida);
@@ -525,11 +549,12 @@
       unificadas.forEach(item => {
         const div = document.createElement('div');
         div.className = 'list-item';
+        const horaExibicao = item.hora || '';
         if (item.tipo === 'venda') {
           div.innerHTML = `
             <div>
               <strong>${item.sabor} (${item.qtd}x)</strong><br>
-              <small style="color: var(--text-muted);">${item.pagamento} • ${item.data}</small>
+              <small style="color: var(--text-muted);">${item.pagamento} • ${item.dataFormatada || ''} ${horaExibicao}</small>
             </div>
             <span style="color: var(--accent-success); font-weight: bold;">+ R$ ${item.total.toFixed(2).replace('.', ',')}</span>
           `;
@@ -537,7 +562,7 @@
           div.innerHTML = `
             <div>
               <strong>${item.desc}</strong><br>
-              <small style="color: var(--text-muted);">Saída • ${item.data}</small>
+              <small style="color: var(--text-muted);">Saída • ${item.dataFormatada || ''} ${horaExibicao}</small>
             </div>
             <span style="color: var(--accent-danger); font-weight: bold;">- R$ ${item.valor.toFixed(2).replace('.', ',')}</span>
           `;
@@ -547,6 +572,42 @@
     }
 
     function atualizarRelatorio() {
+      // 1. RELATÓRIO DIÁRIO (Vendas Agrupadas por Dia)
+      const divDiario = document.getElementById('relatorio-diario');
+      divDiario.innerHTML = '';
+
+      const agrupadoPorDia = {};
+
+      vendas.forEach(v => {
+        const chaveDia = v.dataFormatada || 'Data Anterior';
+        if (!agrupadoPorDia[chaveDia]) {
+          agrupadoPorDia[chaveDia] = { total: 0, unidades: 0 };
+        }
+        agrupadoPorDia[chaveDia].total += v.total;
+        agrupadoPorDia[chaveDia].unidades += v.qtd;
+      });
+
+      const diasOrdenados = Object.keys(agrupadoPorDia).reverse();
+
+      if (diasOrdenados.length === 0) {
+        divDiario.innerHTML = '<div style="color: var(--text-muted); text-align: center;">Nenhuma venda registrada até o momento.</div>';
+      } else {
+        diasOrdenados.forEach(dia => {
+          const dados = agrupadoPorDia[dia];
+          const div = document.createElement('div');
+          div.className = 'list-item';
+          div.innerHTML = `
+            <div>
+              <strong>📅 ${dia}</strong><br>
+              <small style="color: var(--text-muted);">${dados.unidades} geladinho(s) vendido(s)</small>
+            </div>
+            <strong style="color: var(--primary);">R$ ${dados.total.toFixed(2).replace('.', ',')}</strong>
+          `;
+          divDiario.appendChild(div);
+        });
+      }
+
+      // 2. RANKING DE SABORES
       const mapaSabores = {};
       vendas.forEach(v => {
         mapaSabores[v.sabor] = (mapaSabores[v.sabor] || 0) + v.qtd;
@@ -556,52 +617,4 @@
         .map(sabor => ({ sabor, qtd: mapaSabores[sabor] }))
         .sort((a, b) => b.qtd - a.qtd);
 
-      const divRanking = document.getElementById('ranking-sabores');
-      divRanking.innerHTML = '';
-
-      if (ranking.length === 0) {
-        divRanking.innerHTML = '<div style="color: var(--text-muted); text-align: center;">Nenhuma venda registrada.</div>';
-      } else {
-        ranking.forEach((item, idx) => {
-          const div = document.createElement('div');
-          div.className = 'list-item';
-          div.innerHTML = `
-            <div>
-              <span class="ranking-number">#${idx + 1}</span>
-              <strong>${item.sabor}</strong>
-            </div>
-            <span class="badge">${item.qtd} un.</span>
-          `;
-          divRanking.appendChild(div);
-        });
-      }
-
-      const mapaPag = {};
-      vendas.forEach(v => {
-        mapaPag[v.pagamento] = (mapaPag[v.pagamento] || 0) + v.total;
-      });
-
-      const divPagamentos = document.getElementById('relatorio-pagamentos');
-      divPagamentos.innerHTML = '';
-
-      if (Object.keys(mapaPag).length === 0) {
-        divPagamentos.innerHTML = '<div style="color: var(--text-muted); text-align: center;">Nenhum dado disponível.</div>';
-      } else {
-        Object.keys(mapaPag).forEach(forma => {
-          const div = document.createElement('div');
-          div.className = 'list-item';
-          div.innerHTML = `
-            <span>${forma}</span>
-            <strong>R$ ${mapaPag[forma].toFixed(2).replace('.', ',')}</strong>
-          `;
-          divPagamentos.appendChild(div);
-        });
-      }
-    }
-
-    window.onload = function() {
-      renderizarListaSabores();
-    };
-  </script>
-</body>
-</html>
+      const divRanking = document.getElementById('ranking-sab
