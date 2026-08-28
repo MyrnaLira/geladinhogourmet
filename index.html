@@ -93,13 +93,64 @@
       border-color: var(--primary);
     }
 
+    /* Lista de Escolha Multipla */
+    .sabor-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--card-inner);
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .sabor-info {
+      flex: 1;
+    }
+
+    .sabor-nome {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .sabor-preco {
+      font-size: 0.8rem;
+      color: var(--primary);
+    }
+
+    .counter-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-qty {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      margin: 0;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+    }
+
+    .qty-num {
+      width: 24px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
     .total-preview {
       background-color: #1d0330;
       border: 2px dashed var(--primary);
       border-radius: 10px;
       padding: 12px;
       text-align: center;
-      margin-bottom: 14px;
+      margin: 14px 0;
       font-size: 1.1rem;
       font-weight: bold;
     }
@@ -232,33 +283,14 @@
 
   <div class="container">
     
-    <!-- ABA 1: NOVO PEDIDO -->
     <div id="tab-vendas" class="tab-content active">
       <div class="card">
-        <h2>Registrar Venda</h2>
+        <h2>Selecione os Sabores</h2>
         
-        <label for="sabor">Sabor do Geladinho</label>
-        <select id="sabor" onchange="atualizarPrecoAutofill()">
-          <option value="Mousse de Limão" data-preco="5.00">Mousse de Limão - R$ 5,00</option>
-          <option value="Paçoca" data-preco="5.00">Paçoca - R$ 5,00</option>
-          <option value="Oreo" data-preco="7.00">Oreo - R$ 7,00</option>
-          <option value="Ovomaltine" data-preco="7.00">Ovomaltine - R$ 7,00</option>
-          <option value="Ninho com Nutella" data-preco="8.00">Ninho com Nutella - R$ 8,00</option>
-          <option value="Maracujá Supreme" data-preco="8.00">Maracujá Supreme - R$ 8,00</option>
-          <option value="Morango Royale" data-preco="8.00">Morango Royale - R$ 8,00</option>
-          <option value="Prestígio" data-preco="8.00">Prestígio - R$ 8,00</option>
-          <option value="Pudim" data-preco="9.00">Pudim - R$ 9,00</option>
-          <option value="Ninho c/ Frutas Vermelhas" data-preco="9.00">Ninho c/ Frutas Vermelhas - R$ 9,00</option>
-        </select>
-
-        <label for="qtd">Quantidade</label>
-        <input type="number" id="qtd" value="1" min="1" inputmode="numeric" oninput="calcularTotalAutomatico()">
-
-        <label for="precoUnit">Preço Unitário (R$)</label>
-        <input type="number" id="precoUnit" value="5.00" step="0.50" inputmode="decimal" oninput="calcularTotalAutomatico()">
+        <div id="lista-sabores-selecao"></div>
 
         <div class="total-preview">
-          Total da Venda: <span id="total-calculado">R$ 5,00</span>
+          Total da Venda: <span id="total-calculado">R$ 0,00</span>
         </div>
 
         <label for="pagamento">Forma de Pagamento</label>
@@ -273,7 +305,6 @@
       </div>
     </div>
 
-    <!-- ABA 2: CONTROLE DE CAIXA -->
     <div id="tab-caixa" class="tab-content">
       <div class="summary-grid">
         <div class="summary-box">
@@ -307,7 +338,6 @@
       </div>
     </div>
 
-    <!-- ABA 3: RELATÓRIO DE SABORES -->
     <div id="tab-relatorio" class="tab-content">
       <div class="card">
         <h2>Sabores Mais Vendidos</h2>
@@ -322,7 +352,6 @@
 
   </div>
 
-  <!-- NAVEGAÇÃO INFERIOR -->
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('vendas', this)">
       <span>🛒</span>
@@ -339,21 +368,63 @@
   </nav>
 
   <script>
+    const catalogoSabores = [
+      { nome: 'Mousse de Limão', preco: 5.00 },
+      { nome: 'Paçoca', preco: 5.00 },
+      { nome: 'Oreo', preco: 7.00 },
+      { nome: 'Ovomaltine', preco: 7.00 },
+      { nome: 'Ninho com Nutella', preco: 8.00 },
+      { nome: 'Maracujá Supreme', preco: 8.00 },
+      { nome: 'Morango Royale', preco: 8.00 },
+      { nome: 'Prestígio', preco: 8.00 },
+      { nome: 'Pudim', preco: 9.00 },
+      { nome: 'Ninho c/ Frutas Vermelhas', preco: 9.00 }
+    ];
+
+    let quantidades = {};
     let vendas = JSON.parse(localStorage.getItem('din_vendas')) || [];
     let saidas = JSON.parse(localStorage.getItem('din_saidas')) || [];
 
-    function atualizarPrecoAutofill() {
-      const select = document.getElementById('sabor');
-      const preco = select.options[select.selectedIndex].getAttribute('data-preco');
-      document.getElementById('precoUnit').value = parseFloat(preco).toFixed(2);
-      calcularTotalAutomatico();
+    function renderizarListaSabores() {
+      const container = document.getElementById('lista-sabores-selecao');
+      container.innerHTML = '';
+
+      catalogoSabores.forEach((item, index) => {
+        quantidades[index] = quantidades[index] || 0;
+
+        const row = document.createElement('div');
+        row.className = 'sabor-row';
+        row.innerHTML = `
+          <div class="sabor-info">
+            <div class="sabor-nome">${item.nome}</div>
+            <div class="sabor-preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
+          </div>
+          <div class="counter-control">
+            <button type="button" class="btn-qty" onclick="alterarQtd(${index}, -1)">-</button>
+            <span class="qty-num" id="qty-${index}">${quantidades[index]}</span>
+            <button type="button" class="btn-qty" onclick="alterarQtd(${index}, 1)">+</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+      calcularTotalGeral();
     }
 
-    function calcularTotalAutomatico() {
-      const qtd = parseInt(document.getElementById('qtd').value) || 0;
-      const precoUnit = parseFloat(document.getElementById('precoUnit').value) || 0;
-      const total = qtd * precoUnit;
+    function alterarQtd(index, delta) {
+      if (!quantidades[index]) quantidades[index] = 0;
+      quantidades[index] = Math.max(0, quantidades[index] + delta);
+      document.getElementById(`qty-${index}`).innerText = quantidades[index];
+      calcularTotalGeral();
+    }
+
+    function calcularTotalGeral() {
+      let total = 0;
+      catalogoSabores.forEach((item, index) => {
+        const qtd = quantidades[index] || 0;
+        total += qtd * item.preco;
+      });
       document.getElementById('total-calculado').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+      return total;
     }
 
     function switchTab(tabId, element) {
@@ -368,33 +439,41 @@
     }
 
     function registrarVenda() {
-      const sabor = document.getElementById('sabor').value;
-      const qtd = parseInt(document.getElementById('qtd').value);
-      const precoUnit = parseFloat(document.getElementById('precoUnit').value);
+      const totalVenda = calcularTotalGeral();
       const pagamento = document.getElementById('pagamento').value;
 
-      if (!qtd || qtd <= 0 || !precoUnit || precoUnit <= 0) {
-        alert('Por favor, preencha a quantidade e preço corretamente.');
+      if (totalVenda <= 0) {
+        alert('Por favor, adicione pelo menos 1 produto para realizar a venda.');
         return;
       }
 
-      const total = qtd * precoUnit;
-      const venda = {
-        id: Date.now(),
-        sabor,
-        qtd,
-        precoUnit,
-        total,
-        pagamento,
-        data: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      };
+      let resumoSabores = [];
 
-      vendas.push(venda);
+      catalogoSabores.forEach((item, index) => {
+        const qtd = quantidades[index] || 0;
+        if (qtd > 0) {
+          const subtotal = qtd * item.preco;
+          resumoSabores.push(`${qtd}x ${item.nome}`);
+
+          vendas.push({
+            id: Date.now() + index,
+            sabor: item.nome,
+            qtd,
+            precoUnit: item.preco,
+            total: subtotal,
+            pagamento,
+            data: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+          });
+        }
+      });
+
       localStorage.setItem('din_vendas', JSON.stringify(vendas));
 
-      alert(`Venda registrada!\n${qtd}x ${sabor} - Total: R$ ${total.toFixed(2).replace('.', ',')}`);
-      document.getElementById('qtd').value = 1;
-      calcularTotalAutomatico();
+      alert(`Venda registrada com sucesso!\n\nItens:\n${resumoSabores.join('\n')}\n\nTotal: R$ ${totalVenda.toFixed(2).replace('.', ',')}`);
+
+      // Reseta as quantidades após a venda
+      quantidades = {};
+      renderizarListaSabores();
     }
 
     function registrarSaida() {
@@ -434,9 +513,9 @@
       const lista = document.getElementById('lista-movimentacoes');
       lista.innerHTML = '';
 
-      const ultimasVendas = vendas.slice(-5).map(v => ({ ...v, tipo: 'venda' }));
-      const ultimasSaidas = saidas.slice(-5).map(s => ({ ...s, tipo: 'saida' }));
-      const unificadas = [...ultimasVendas, ...ultimasSaidas].sort((a, b) => b.id - a.id).slice(0, 7);
+      const ultimasVendas = vendas.slice(-10).map(v => ({ ...v, tipo: 'venda' }));
+      const ultimasSaidas = saidas.slice(-10).map(s => ({ ...s, tipo: 'saida' }));
+      const unificadas = [...ultimasVendas, ...ultimasSaidas].sort((a, b) => b.id - a.id).slice(0, 10);
 
       if (unificadas.length === 0) {
         lista.innerHTML = '<div style="color: var(--text-muted); text-align: center;">Nenhuma movimentação.</div>';
@@ -521,7 +600,7 @@
     }
 
     window.onload = function() {
-      atualizarPrecoAutofill();
+      renderizarListaSabores();
     };
   </script>
 </body>
