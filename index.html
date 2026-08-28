@@ -204,14 +204,17 @@
         <h2>Registrar Venda</h2>
         
         <label for="sabor">Sabor do Din Din</label>
-        <select id="sabor">
-          <option value="Ninho com Nutella">Ninho com Nutella</option>
-          <option value="Morango Gourmet">Morango Gourmet</option>
-          <option value="Oreo">Oreo</option>
-          <option value="Maracujá Gourmet">Maracujá Gourmet</option>
-          <option value="Paçoca">Paçoca</option>
-          <option value="Coco Queimado">Coco Queimado</option>
-          <option value="Ovomaltine">Ovomaltine</option>
+        <select id="sabor" onchange="atualizarPrecoAutofill()">
+          <option value="Mousse de Limão" data-preco="5.00">Mousse de Limão - R$ 5,00</option>
+          <option value="Paçoca" data-preco="5.00">Paçoca - R$ 5,00</option>
+          <option value="Oreo" data-preco="7.00">Oreo - R$ 7,00</option>
+          <option value="Ovomaltine" data-preco="7.00">Ovomaltine - R$ 7,00</option>
+          <option value="Ninho com Nutella" data-preco="8.00">Ninho com Nutella - R$ 8,00</option>
+          <option value="Maracujá Supreme" data-preco="8.00">Maracujá Supreme - R$ 8,00</option>
+          <option value="Morango Royale" data-preco="8.00">Morango Royale - R$ 8,00</option>
+          <option value="Prestígio" data-preco="8.00">Prestígio - R$ 8,00</option>
+          <option value="Pudim" data-preco="9.00">Pudim - R$ 9,00</option>
+          <option value="Ninho c/ Frutas Vermelhas" data-preco="9.00">Ninho c/ Frutas Vermelhas - R$ 9,00</option>
         </select>
 
         <label for="qtd">Quantidade</label>
@@ -304,9 +307,14 @@
   </nav>
 
   <script>
-    // Estrutura de dados local
     let vendas = JSON.parse(localStorage.getItem('din_vendas')) || [];
     let saidas = JSON.parse(localStorage.getItem('din_saidas')) || [];
+
+    function atualizarPrecoAutofill() {
+      const select = document.getElementById('sabor');
+      const preco = select.options[select.selectedIndex].getAttribute('data-preco');
+      document.getElementById('precoUnit').value = parseFloat(preco).toFixed(2);
+    }
 
     function switchTab(tabId, element) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -382,7 +390,6 @@
       document.getElementById('total-saidas').innerText = `R$ ${totalSaidas.toFixed(2)}`;
       document.getElementById('saldo-total').innerText = `R$ ${saldo.toFixed(2)}`;
 
-      // Lista unificada das últimas movimentações
       const lista = document.getElementById('lista-movimentacoes');
       lista.innerHTML = '';
 
@@ -420,7 +427,6 @@
     }
 
     function atualizarRelatorio() {
-      // Agrupamento de sabores
       const mapaSabores = {};
       vendas.forEach(v => {
         mapaSabores[v.sabor] = (mapaSabores[v.sabor] || 0) + v.qtd;
@@ -450,7 +456,6 @@
         });
       }
 
-      // Agrupamento por Forma de Pagamento
       const mapaPag = {};
       vendas.forEach(v => {
         mapaPag[v.pagamento] = (mapaPag[v.pagamento] || 0) + v.total;
@@ -473,6 +478,9 @@
         });
       }
     }
+
+    // Inicializa preço no carregamento da tela
+    window.onload = atualizarPrecoAutofill;
   </script>
 </body>
 </html>
