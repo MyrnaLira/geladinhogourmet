@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Din Din Gourmet - PDV & Caixa</title>
+  <style>
+    :root {
+      --primary: #ff69b4;
+      --primary-dark: #ff1493;
+      --bg-dark: #121212;
+      --card-bg: #1e1e1e;
+      --text-light: #ffffff;
+      --text-muted: #b0b0b0;
+      --border-color: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      padding-bottom: 70px;
+    }
+
+    header {
+      background-color: #000000;
+      color: var(--primary);
+      text-align: center;
+      padding: 15px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-bottom: 2px solid var(--primary);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .container {
+      padding: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border-color);
+    }
+
+    h2 {
+      color: var(--primary);
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 6px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: #2a2a2a;
+      color: var(--text-light);
+      font-size: 1rem;
+      margin-bottom: 12px;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    button {
+      background-color: var(--primary);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:active {
+      opacity: 0.8;
+    }
+
+    .btn-danger {
+      background-color: #ff4444;
+      color: #fff;
+    }
+
+    .nav-tabs {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #000;
+      display: flex;
+      border-top: 1px solid var(--border-color);
+      height: 60px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0;
+      border-radius: 0;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .summary-box {
+      background-color: #252525;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .summary-box .val {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin-top: 4px;
+    }
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .badge {
+      background-color: var(--primary);
+      color: #000;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .ranking-number {
+      font-weight: bold;
+      color: var(--primary);
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>Din Din Gourmet 🍧</header>
+
+  <div class="container">
+    
+    <!-- ABA 1: NOVO PEDIDO -->
+    <div id="tab-vendas" class="tab-content active">
+      <div class="card">
+        <h2>Registrar Venda</h2>
+        
+        <label for="sabor">Sabor do Din Din</label>
+        <select id="sabor">
+          <option value="Ninho com Nutella">Ninho com Nutella</option>
+          <option value="Morango Gourmet">Morango Gourmet</option>
+          <option value="Oreo">Oreo</option>
+          <option value="Maracujá Gourmet">Maracujá Gourmet</option>
+          <option value="Paçoca">Paçoca</option>
+          <option value="Coco Queimado">Coco Queimado</option>
+          <option value="Ovomaltine">Ovomaltine</option>
+        </select>
+
+        <label for="qtd">Quantidade</label>
+        <input type="number" id="qtd" value="1" min="1">
+
+        <label for="precoUnit">Preço Unitário (R$)</label>
+        <input type="number" id="precoUnit" value="5.00" step="0.50">
+
+        <label for="pagamento">Forma de Pagamento</label>
+        <select id="pagamento">
+          <option value="Pix">Pix</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão de Crédito">Cartão de Crédito</option>
+          <option value="Cartão de Débito">Cartão de Débito</option>
+        </select>
+
+        <button onclick="registrarVenda()">Confirmar Venda</button>
+      </div>
+    </div>
+
+    <!-- ABA 2: CONTROLE DE CAIXA -->
+    <div id="tab-caixa" class="tab-content">
+      <div class="summary-grid">
+        <div class="summary-box">
+          <div>Entradas (Vendas)</div>
+          <div class="val" id="total-entradas">R$ 0,00</div>
+        </div>
+        <div class="summary-box">
+          <div>Saídas (Despesas)</div>
+          <div class="val" id="total-saidas" style="color: #ff4444;">R$ 0,00</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Saldo Atual: <span id="saldo-total" style="color: var(--primary);">R$ 0,00</span></h2>
+      </div>
+
+      <div class="card">
+        <h2>Registrar Saída/Despesa</h2>
+        <label for="desc-saida">Descrição (ex: Leite Condensado)</label>
+        <input type="text" id="desc-saida" placeholder="Digite o motivo">
+
+        <label for="valor-saida">Valor (R$)</label>
+        <input type="number" id="valor-saida" placeholder="0.00" step="0.50">
+
+        <button class="btn-danger" onclick="registrarSaida()">Lançar Despesa</button>
+      </div>
+
+      <div class="card">
+        <h2>Últimas Movimentações</h2>
+        <div id="lista-movimentacoes">
+          <!-- Inserido dinamicamente -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 3: RELATÓRIO DE SABORES -->
+    <div id="tab-relatorio" class="tab-content">
+      <div class="card">
+        <h2>Sabores Mais Vendidos</h2>
+        <div id="ranking-sabores">
+          <!-- Inserido dinamicamente -->
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Vendas por Pagamento</h2>
+        <div id="relatorio-pagamentos">
+          <!-- Inserido dinamicamente -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NAVEGAÇÃO INFERIOR -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('vendas', this)">
+      <span>🛒</span>
+      <span>Venda</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('caixa', this)">
+      <span>💰</span>
+      <span>Caixa</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('relatorio', this)">
+      <span>📊</span>
+      <span>Relatório</span>
+    </button>
+  </nav>
+
+  <script>
+    // Estrutura de dados local
+    let vendas = JSON.parse(localStorage.getItem('din_vendas')) || [];
+    let saidas = JSON.parse(localStorage.getItem('din_saidas')) || [];
+
+    function switchTab(tabId, element) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabId).classList.add('active');
+      element.classList.add('active');
+
+      if (tabId === 'caixa') atualizarCaixa();
+      if (tabId === 'relatorio') atualizarRelatorio();
+    }
+
+    function registrarVenda() {
+      const sabor = document.getElementById('sabor').value;
+      const qtd = parseInt(document.getElementById('qtd').value);
+      const precoUnit = parseFloat(document.getElementById('precoUnit').value);
+      const pagamento = document.getElementById('pagamento').value;
+
+      if (!qtd || qtd <= 0 || !precoUnit || precoUnit <= 0) {
+        alert('Por favor, preencha os valores corretamente.');
+        return;
+      }
+
+      const total = qtd * precoUnit;
+      const venda = {
+        id: Date.now(),
+        sabor,
+        qtd,
+        precoUnit,
+        total,
+        pagamento,
+        data: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      };
+
+      vendas.push(venda);
+      localStorage.setItem('din_vendas', JSON.stringify(vendas));
+
+      alert(`Venda registrada!\n${qtd}x ${sabor} - Total: R$ ${total.toFixed(2)}`);
+      document.getElementById('qtd').value = 1;
+    }
+
+    function registrarSaida() {
+      const desc = document.getElementById('desc-saida').value;
+      const valor = parseFloat(document.getElementById('valor-saida').value);
+
+      if (!desc || !valor || valor <= 0) {
+        alert('Preencha a descrição e o valor da saída.');
+        return;
+      }
+
+      const saida = {
+        id: Date.now(),
+        desc,
+        valor,
+        data: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      };
+
+      saidas.push(saida);
+      localStorage.setItem('din_saidas', JSON.stringify(saidas));
+
+      document.getElementById('desc-saida').value = '';
+      document.getElementById('valor-saida').value = '';
+
+      atualizarCaixa();
+    }
+
+    function atualizarCaixa() {
+      const totalEntradas = vendas.reduce((acc, v) => acc + v.total, 0);
+      const totalSaidas = saidas.reduce((acc, s) => acc + s.valor, 0);
+      const saldo = totalEntradas - totalSaidas;
+
+      document.getElementById('total-entradas').innerText = `R$ ${totalEntradas.toFixed(2)}`;
+      document.getElementById('total-saidas').innerText = `R$ ${totalSaidas.toFixed(2)}`;
+      document.getElementById('saldo-total').innerText = `R$ ${saldo.toFixed(2)}`;
+
+      // Lista unificada das últimas movimentações
+      const lista = document.getElementById('lista-movimentacoes');
+      lista.innerHTML = '';
+
+      const ultimasVendas = vendas.slice(-5).map(v => ({ ...v, tipo: 'venda' }));
+      const ultimasSaidas = saidas.slice(-5).map(s => ({ ...s, tipo: 'saida' }));
+      const unificadas = [...ultimasVendas, ...ultimasSaidas].sort((a, b) => b.id - a.id).slice(0, 7);
+
+      if (unificadas.length === 0) {
+        lista.innerHTML = '<div style="color: var(--text-muted); text-align: center;">Nenhuma movimentação.</div>';
+        return;
+      }
+
+      unificadas.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        if (item.tipo === 'venda') {
+          div.innerHTML = `
+            <div>
+              <strong>${item.sabor} (${item.qtd}x)</strong><br>
+              <small style="color: var(--text-muted);">${item.pagamento} • ${item.data}</small>
+            </div>
+            <span style="color: #00e676; font-weight: bold;">+ R$ ${item.total.toFixed(2)}</span>
+          `;
+        } else {
+          div.innerHTML = `
+            <div>
+              <strong>${item.desc}</strong><br>
+              <small style="color: var(--text-muted);">Saída • ${item.data}</small>
+            </div>
+            <span style="color: #ff4444; font-weight: bold;">- R$ ${item.valor.toFixed(2)}</span>
+          `;
+        }
+        lista.appendChild(div);
+      });
+    }
+
+    function atualizarRelatorio() {
+      // Agrupamento de sabores
+      const mapaSabores = {};
+      vendas.forEach(v => {
+        mapaSabores[v.sabor] = (mapaSabores[v.sabor] || 0) + v.qtd;
+      });
+
+      const ranking = Object.keys(mapaSabores)
+        .map(sabor => ({ sabor, qtd: mapaSabores[sabor] }))
+        .sort((a, b) => b.qtd - a.qtd);
+
+      const divRanking = document.getElementById('ranking-sabores');
+      divRanking.innerHTML = '';
+
+      if (ranking.length === 0) {
+        divRanking.innerHTML = '<div style="color: var(--text-muted); text-align: center;">Nenhuma venda registrada.</div>';
+      } else {
+        ranking.forEach((item, idx) => {
+          const div = document.createElement('div');
+          div.className = 'list-item';
+          div.innerHTML = `
+            <div>
+              <span class="ranking-number">#${idx + 1}</span>
+              <strong>${item.sabor}</strong>
+            </div>
+            <span class="badge">${item.qtd} un.</span>
+          `;
+          divRanking.appendChild(div);
+        });
+      }
+
+      // Agrupamento por Forma de Pagamento
+      const mapaPag = {};
+      vendas.forEach(v => {
+        mapaPag[v.pagamento] = (mapaPag[v.pagamento] || 0) + v.total;
+      });
+
+      const divPagamentos = document.getElementById('relatorio-pagamentos');
+      divPagamentos.innerHTML = '';
+
+      if (Object.keys(mapaPag).length === 0) {
+        divPagamentos.innerHTML = '<div style="color: var(--text-muted); text-align: center;">Nenhum dado disponível.</div>';
+      } else {
+        Object.keys(mapaPag).forEach(forma => {
+          const div = document.createElement('div');
+          div.className = 'list-item';
+          div.innerHTML = `
+            <span>${forma}</span>
+            <strong>R$ ${mapaPag[forma].toFixed(2)}</strong>
+          `;
+          divPagamentos.appendChild(div);
+        });
+      }
+    }
+  </script>
+</body>
+</html>
