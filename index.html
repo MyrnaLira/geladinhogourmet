@@ -300,7 +300,6 @@
 
   <div class="container">
     
-    <!-- ABA 1: NOVO PEDIDO -->
     <div id="tab-vendas" class="tab-content active">
       <div class="card">
         <h2>Selecione os Sabores</h2>
@@ -323,7 +322,6 @@
       </div>
     </div>
 
-    <!-- ABA 2: CONTROLE DE CAIXA -->
     <div id="tab-caixa" class="tab-content">
       <div class="summary-grid">
         <div class="summary-box">
@@ -357,7 +355,6 @@
       </div>
     </div>
 
-    <!-- ABA 3: RELATÓRIO -->
     <div id="tab-relatorio" class="tab-content">
       <div class="card">
         <h2>Vendas Diárias (Histórico)</h2>
@@ -377,7 +374,6 @@
 
   </div>
 
-  <!-- NAVEGAÇÃO INFERIOR -->
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('vendas', this)">
       <span>🛒</span>
@@ -545,6 +541,7 @@
       atualizarCaixa();
     }
 
+    // Função para apagar lançamentos (vendas ou despesas)
     function apagarItem(id, tipo) {
       if (confirm('Tem certeza que deseja apagar este registro?')) {
         if (tipo === 'venda') {
@@ -614,7 +611,6 @@
     }
 
     function atualizarRelatorio() {
-      // 1. RELATÓRIO DIÁRIO
       const divDiario = document.getElementById('relatorio-diario');
       divDiario.innerHTML = '';
 
@@ -649,7 +645,6 @@
         });
       }
 
-      // 2. RANKING DE SABORES
       const mapaSabores = {};
       vendas.forEach(v => {
         mapaSabores[v.sabor] = (mapaSabores[v.sabor] || 0) + (Number(v.qtd) || 0);
@@ -679,7 +674,6 @@
         });
       }
 
-      // 3. VENDAS POR PAGAMENTO
       const mapaPag = {};
       vendas.forEach(v => {
         mapaPag[v.pagamento] = (mapaPag[v.pagamento] || 0) + (Number(v.total) || 0);
